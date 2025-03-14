@@ -1,15 +1,51 @@
 using System;
-using System.Collections;
 using UnityEngine;
+// using UnityEngine.InputSystem;
+//using UnityEngine.InputSystem.EnhancedTouch;
 
-public class RotationScript : MonoBehaviour
+public class PinchZoom : MonoBehaviour
 {
-
-    [SerializeField] private float _ZoomMax, _ZoomMin;
+    public Camera camera;
+    public float minZoom = 2f;
+    public float maxZoom = 10f;
 
     private float rotationSpeed = 180f;
-     private Vector2 _startTouchPosition, _currentTouchPosition;
+    private Vector2 _startTouchPosition, _currentTouchPosition;
+    private Vector2 _touchStartPos1, _touchStartPos2;
+    private float _initialDistance;
+    private float pinchZoomSpeed = 0.1f;
 
+
+    // private void OnEnable()
+    // {
+    //     EnhancedTouchSupport.Enable(); // Включаем систему тач-ввода
+
+    // }
+
+    // private void OnDisable()
+    // {
+    //     EnhancedTouchSupport.Disable();
+    //     TouchSimulation.Disable();
+    // }
+
+    // private void Update()
+    // {
+    //     var activeTouches = UnityEngine.InputSystem.EnhancedTouch.Touch.activeTouches;
+
+    //     if (activeTouches.Count == 2)
+    //     {
+    //         Touch touch1 = activeTouches[0];
+    //         Touch touch2 = activeTouches[1];
+
+    //         float prevDistance = (touch1.startScreenPosition - touch2.startScreenPosition).magnitude;
+    //         float currentDistance = (touch1.screenPosition - touch2.screenPosition).magnitude;
+
+    //         float difference = currentDistance - prevDistance;
+
+    //         float newSize = camera.fieldOfView - difference * zoomSpeed;
+    //        camera.fieldOfView = Mathf.Clamp(camera.fieldOfView - difference * zoomSpeed, minZoom, maxZoom);
+    //     }
+    // }
 
 
     void Update()
@@ -18,13 +54,8 @@ public class RotationScript : MonoBehaviour
         {
             SwipeRotateCube();
             SwipeZoom();
-
         }
-
     }
-
-
-
 
     private void SwipeRotateCube()
     {
@@ -63,27 +94,43 @@ public class RotationScript : MonoBehaviour
 
 private void SwipeZoom()
 {
-    if(Input.touchCount ==2)
+    if(Input.touchCount == 2)
     {
-        Touch _touchZero = Input.GetTouch(0);
-        Touch _touchOne = Input.GetTouch(1);
+        Touch touch1 = Input.GetTouch(0);
+        Touch touch2 = Input.GetTouch(1);
 
-        Vector2 _touchZeroPos = _touchZero.position - _touchZero.deltaPosition;
-        Vector2 _touchOnePos = _touchOne.position - _touchOne.deltaPosition;
+       if (touch1.phase == TouchPhase.Began || touch2.phase == TouchPhase.Began)
+            {
+                _touchStartPos1 = touch1.position;
+                _touchStartPos2 = touch2.position;
+                _initialDistance = Vector2.Distance(_touchStartPos1, _touchStartPos2);
+            }
+            else if (touch1.phase == TouchPhase.Moved || touch2.phase == TouchPhase.Moved)
+            {
+                float currentDistance = Vector2.Distance(touch1.position, touch2.position);
+                float pinchAmount = currentDistance - _initialDistance;
+                
+                if (Mathf.Abs(pinchAmount) > pinchZoomSpeed)
+                {
+                    if (pinchAmount > 0)
+                    {
+                        Debug.Log($"pich {pinchAmount}");
+                        Camera.main.fieldOfView = maxZoom;
+                    }
+                    else
+                    {
+                        Debug.Log($"pich {pinchAmount}");
+                        Camera.main.fieldOfView = minZoom;
+                    }
 
-        float _distouch = (_touchZeroPos - _touchOnePos).magnitude;
-        float _currrentDisTouch = (_touchZero.position - _touchOne.position).magnitude;
+                    _initialDistance = currentDistance;
+                }
 
-        float _difference = _currrentDisTouch - _distouch;
-
-        Zoom(_difference * 0.1f);
-    
+            }
+            else if (touch1.phase == TouchPhase.Ended || touch2.phase == TouchPhase.Ended)
+            {
+                Camera.main.fieldOfView = 100;
+            }
     }
 }
-
-private void Zoom(float increment)
-{
-    Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize-increment, _ZoomMin, _ZoomMax);
-}
-
 }
