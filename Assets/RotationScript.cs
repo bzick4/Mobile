@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class PinchZoom : MonoBehaviour
 {
-    public Camera camera;
-    public float minZoom = 2f;
-    public float maxZoom = 10f;
+    [SerializeField] private Camera _Camera;
+    [SerializeField] private float _MinZoom;
+    [SerializeField] private float _MaxZoom;
 
     private float rotationSpeed = 180f;
     private Vector2 _startTouchPosition, _currentTouchPosition;
@@ -115,12 +115,14 @@ private void SwipeZoom()
                     if (pinchAmount > 0)
                     {
                         Debug.Log($"pich {pinchAmount}");
-                        Camera.main.fieldOfView = maxZoom;
+                        _Camera.fieldOfView = _MaxZoom;
+                        
                     }
                     else
                     {
                         Debug.Log($"pich {pinchAmount}");
-                        Camera.main.fieldOfView = minZoom;
+                        _Camera.fieldOfView = _MinZoom;
+                        
                     }
 
                     _initialDistance = currentDistance;
@@ -129,7 +131,7 @@ private void SwipeZoom()
             }
             else if (touch1.phase == TouchPhase.Ended || touch2.phase == TouchPhase.Ended)
             {
-                Camera.main.fieldOfView = 100;
+                _Camera.fieldOfView = 100;
             }
     }
 }
