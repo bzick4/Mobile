@@ -116,13 +116,11 @@ private void SwipeZoom()
                     {
                         Debug.Log($"pich {pinchAmount}");
                         _Camera.fieldOfView = _MaxZoom;
-                        
                     }
                     else
                     {
                         Debug.Log($"pich {pinchAmount}");
                         _Camera.fieldOfView = _MinZoom;
-                        
                     }
 
                     _initialDistance = currentDistance;
